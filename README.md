@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# Live Agent Run Panel
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive React application built for the **JcurveIQ Frontend Engineer Take-Home Assessment**. It visualizes a real-time stream of AI agent events within a financial platform context (Portfolio Risk Assessment), rendering streaming states, parallel executions, and agent reasoning.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Real-Time Event Streaming**: Simulates a live agent workflow with staggered timing, showing tasks as they are `pending`, `running`, `completed`, or `cancelled`.
+- **Question-Driven Flow**: The agent stream is triggered by a user prompt (e.g., "Analyze my portfolio risk exposure"), displaying the query as context.
+- **Parallel Task Execution**: Automatically detects tasks executing concurrently (sharing the same sequence/start time) and groups them visually side-by-side using horizontal layout structures to make concurrency obvious.
+- **Collapsible Reasoning (Thoughts)**: Each task features an expandable "Terminal" thought box displaying the agent's internal reasoning process.
+- **Tool Invocations**: Visualizes tool calls (e.g., Google Search, SEC Parser, VaR Calculator) with clear input and output data blocks and corresponding Lucide icons.
+- **"Optimized" State Handling**: Gracefully handles task cancellations caused by `sufficient_data` by badging them as "Optimized" (amber accent) rather than treating them as errors.
+- **Strict Monochrome Theme**: Designed with a high-contrast, black-and-white aesthetic fitting for a modern financial platform, using subtle borders and typography hierarchies (Tailwind CSS).
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React 19** 
+- **TypeScript**
+- **Tailwind CSS v4** (No component libraries used)
+- **Vite** (Build tool)
+- **Lucide-React** (Icons)
 
-## Expanding the ESLint configuration
+*(Note: The project strictly adheres to the requirement of not using pre-built UI component libraries like TailwindUI, Radix, or Shadcn.)*
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Architecture Overview
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+1. **State Management (`useAgentStream.ts`)**: 
+   - Uses `useReducer` to manage the complex stream state deterministically.
+   - Handles the progression of 17 mock financial events (simulating a portfolio analysis pipeline).
+   - Dynamically calculates parallel groups based on `startTime`.
+   - Idempotent stream scheduling with proper cleanup to effortlessly support React StrictMode.
+   
+2. **Components (`src/components/AgentPanel/`)**:
+   - `AgentRunPanel`: The root orchestrator, managing layout, input prompts, progress bars, and stats.
+   - `TaskCard`: The main unit of work display, indicating status, tools, and recursive reasoning.
+   - `ParallelGroup`: A specialized container that intercepts concurrent tasks and renders them horizontally.
+   - `ToolBadge` & `ThoughtBox`: Modular UI components for high information density.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Prerequisites
+- Node.js (v18+)
+- pnpm (recommended) or npm
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Installation & Running Locally
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. Clone the repository and navigate into the project directory:
+   ```bash
+   git clone git@github.com:atharvdsingh/JcurveIQ.git
+   cd assignment
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Start the development server:
+   ```bash
+   pnpm dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5174/` (or the port specified in your console).
+
+## Design Decisions
+
+- **Parallel Visualization**: Chose a horizontal Flexbox layout with a dashed accent line (`ParallelGroup.tsx`) to represent concurrency, as stacking parallel items vertically obscures their simultaneous nature.
+- **Information Density vs. Cognitive Load**: Kept tool inputs/outputs and reasoning chunks collapsed or subtly styled by default to ensure the top-level pipeline remains scannable.
+- **No Dependencies on Component Libraries**: Crafted all animations (e.g., pulsing borders for running tasks, `fadeSlideIn`) manually via CSS and Tailwind classes (`index.css`) to demonstrate core CSS competency.
